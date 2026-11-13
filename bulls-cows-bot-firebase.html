@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BOT</title>
+<style>
+:root{--bg:#f4f5f7;--card:#fff;--ink:#16181d;--mute:#7a7f89;--line:#eceef2;--key:#eef0f3;--acc:#2563eb;--bull:#1f7a5a;--cow:#d98a1e;--ai:#7c4dff;--shadow:0 1px 2px rgba(0,0,0,.05),0 6px 18px rgba(0,0,0,.06);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17181a;--card:#222426;--ink:#f1f0ec;--mute:#9a9aa0;--line:#34363a;--key:#2e3033;--acc:#6ea8ff;--bull:#5fbf8f;--cow:#e9a94a;--ai:#b794ff;--shadow:none;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17181a;--card:#222426;--ink:#f1f0ec;--mute:#9a9aa0;--line:#34363a;--key:#2e3033;--acc:#6ea8ff;--bull:#5fbf8f;--cow:#e9a94a;--ai:#b794ff;--shadow:none;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:440px;margin:0 auto;padding:22px 16px 32px}
+h1{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:0 0 14px}
+h1 .mute{font-size:14px;font-weight:500;letter-spacing:0}
+.card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+.mute{color:var(--mute);font-size:13px}
+.u{color:var(--acc)}.a{color:var(--ai)}
+input[type=checkbox]{accent-color:var(--acc)}
+.opts{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 18px}
+button{font:inherit;color:var(--ink);background:var(--key);border:0;border-radius:12px;padding:12px 4px;font-size:15px;cursor:pointer}
+button:active{transform:scale(.97)}
+button:disabled{opacity:.4}
+.opt{flex:1;min-width:52px;font-weight:600}
+.opt.sel{background:var(--acc);color:#fff}
+#rb .opt.sel{background:var(--bull)}#rc .opt.sel{background:var(--cow)}
+.wide{width:100%;font-size:16px;padding:15px;margin-top:10px;background:var(--acc);color:#fff;font-weight:600;border-radius:14px}
+.ghost{background:var(--card);box-shadow:var(--shadow);color:var(--ink);font-weight:500}
+.hide{display:none}
+/* points */
+#lvl{display:flex;justify-content:space-between;align-items:baseline}
+#lvl b{font-size:20px}
+.bar{height:10px;background:var(--key);border-radius:99px;overflow:hidden;margin:10px 0 6px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),#38bdf8);border-radius:99px;transition:width .4s}
+/* game */
+#score{display:flex;justify-content:space-between;align-items:center;font-size:15px;background:var(--card);border-radius:999px;padding:10px 18px;box-shadow:var(--shadow);margin-bottom:14px}
+#score b{font-size:20px}
+#logs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px}
+.box{height:164px;overflow-y:auto;padding:0 14px 8px;margin:0}
+.hd{position:sticky;top:0;background:var(--card);font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:12px 0 6px}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:4px;padding:7px 0}
+.row+.row{border-top:1px solid var(--line)}
+.g{font-size:18px;font-weight:600;letter-spacing:3px;font-variant-numeric:tabular-nums}
+.bc{font-size:12px;font-weight:600;white-space:nowrap}
+.bc .b{color:var(--bull)}.bc .c{color:var(--cow)}
+.none{color:var(--mute);font-size:12px;padding:12px 0}
+#msg{min-height:46px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 10px;font-size:14px;line-height:1.4;font-weight:600}
+#bg{font-size:42px;letter-spacing:10px;text-align:center;font-weight:700;color:var(--ai);margin:6px 0 18px}
+.rep .opt{font-size:17px;padding:12px 0}
+#slots{display:flex;gap:10px;justify-content:center;margin:8px 0 16px}
+.slot{width:54px;height:62px;background:var(--key);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:600}
+.slot.on{box-shadow:inset 0 0 0 2px var(--acc)}
+#pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+#pad button{background:var(--card);box-shadow:var(--shadow);border-radius:14px;padding:16px 0;font-size:22px;font-weight:500}
+#pad #go{background:var(--acc);color:#fff;font-size:16px;font-weight:600}
+#pad button:disabled{box-shadow:none;background:var(--key)}
+/* history */
+.gh{width:100%;display:flex;justify-content:space-between;align-items:center;text-align:left;background:var(--card);box-shadow:var(--shadow);border-radius:14px;padding:12px 14px;margin-top:10px}
+.gh small{display:block;color:var(--mute);font-size:12px;margin-top:2px}
+.gd{background:var(--card);border-radius:0 0 14px 14px;padding:4px 14px 12px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.gd .hd{position:static;padding:8px 0 4px}
+</style>
+</head>
+<body>
+<main>
+  <h1>BOT <span class="mute">· Bulls &amp; Cows</span></h1>
+
+  <section id="home">
+    <div class="card" id="acct" style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="mute" id="acctText">Sign in to save your progress online.</span><button id="acctBtn" style="padding:10px 14px;white-space:nowrap">Sign in</button></div>
+    <div class="card" id="pts"></div>
+    <div class="card">
+      <div class="mute">Mode</div>
+      <div class="opts" id="mode"></div>
+      <div class="mute">Number of digits</div>
+      <div class="opts" id="dig"></div>
+      <div id="fmtwrap"><div class="mute">Match format</div>
+      <div class="opts" id="fmt"></div></div>
+      <p class="mute" id="note" style="line-height:1.5;margin:14px 0 0"></p>
+      <button class="wide" id="start">Start match</button>
+    </div>
+    <button class="wide ghost" id="openhist">History of games</button>
+  </section>
+
+  <section id="hist" class="hide">
+    <button class="ghost" id="back1" style="padding:10px 16px;margin-bottom:6px">← Home</button>
+    <div id="hlist"></div>
+    <button class="wide ghost hide" id="clear">Clear history</button>
+  </section>
+
+  <section id="game" class="hide">
+    <div id="score"></div>
+    <div id="logs">
+      <div class="card box" id="lu"></div>
+      <div class="card box" id="la"></div>
+    </div>
+    <div id="msg"></div>
+    <div class="card rep hide" id="report">
+      <div class="mute" style="text-align:center">BOT guesses</div>
+      <div id="bg"></div>
+      <div class="mute">Bulls (right digit, right spot)</div>
+      <div class="opts" id="rb"></div>
+      <div class="mute">Cows (right digit, wrong spot)</div>
+      <div class="opts" id="rc"></div>
+      <button class="wide" id="send" style="margin-top:0">Send</button>
+    </div>
+    <div id="play" class="hide">
+      <div class="mute" style="text-align:center">Your guess for BOT’s number</div>
+      <div id="slots"></div>
+      <div id="pad"></div>
+    </div>
+    <button class="wide hide" id="next">Next round</button>
+    <button class="wide ghost hide" id="home2">Back to home</button>
+    <button class="wide ghost hide" id="quit">Quit game</button>
+  </section>
+</main>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)};
+  var FORMATS=[{n:"Single round",need:1},{n:"Best of 3",need:2},{n:"Best of 5",need:3},{n:"Best of 7",need:4}];
+  var LEVELS=[{n:"Rookie",at:0},{n:"Amateur",at:50},{n:"Skilled",at:120},{n:"Expert",at:220},{n:"Master",at:350}];
+  var POPT=[0,0.3,0.6,0.85,1],WILD=[0.35,0,0,0,0];
+  function load(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+  function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}if(window.botCloud&&(k==="bot-pts"||k==="bot-hist"))window.botCloud.save(S.pts,S.hist)}
+  var S={mode:"duel",n:3,need:1,score:{u:0,a:0},round:1,starter:"u",next:"u",aSecret:"",cands:[],uT:[],aT:[],cur:"",phase:"home",busy:false,pending:"",rb:-1,rc:-1,cache:{},gid:0,lvl:0,pts:load("bot-pts",0),hist:load("bot-hist",[]),open:-1};
+
+  function levelOf(p){var l=0;for(var i=0;i<LEVELS.length;i++)if(p>=LEVELS[i].at)l=i;return l}
+  function rep(){return true}
+  function allCodes(){
+    var key=S.n+(rep()?"r":"u");
+    if(S.cache[key])return S.cache[key];
+    var r=[],tot=Math.pow(10,S.n),i,s,j;
+    for(i=0;i<tot;i++){
+      s=String(i);while(s.length<S.n)s="0"+s;
+      if(!rep()){var seen={},ok=true;for(j=0;j<s.length;j++){if(seen[s[j]]){ok=false;break}seen[s[j]]=1}if(!ok)continue}
+      r.push(s);
+    }
+    return S.cache[key]=r;
+  }
+  function valid(s){
+    if(s.length!==S.n)return false;
+    if(rep())return true;
+    var seen={};for(var i=0;i<s.length;i++){if(seen[s[i]])return false;seen[s[i]]=1}return true;
+  }
+  function score(a,g){
+    var n=S.n,b=0,ca=[0,0,0,0,0,0,0,0,0,0],cg=[0,0,0,0,0,0,0,0,0,0],t=0,i,x,y;
+    for(i=0;i<n;i++){x=a.charCodeAt(i)-48;y=g.charCodeAt(i)-48;if(x===y)b++;ca[x]++;cg[y]++}
+    for(i=0;i<10;i++)t+=ca[i]<cg[i]?ca[i]:cg[i];
+    return b*(n+1)+(t-b);
+  }
+  function sample(arr,m){
+    if(arr.length<=m)return arr;
+    var a=arr.slice(),i,j,t;
+    for(i=0;i<m;i++){j=i+Math.floor(Math.random()*(a.length-i));t=a[i];a[i]=a[j];a[j]=t}
+    return a.slice(0,m);
+  }
+  function rnd(a){return a[Math.floor(Math.random()*a.length)]}
+
+  // Strongest play: keep every number that fits all answers, pick the guess that splits them best.
+  function pickBest(){
+    var all=allCodes(),c=S.cands,n=S.n;
+    if(S.aT.length===0&&n>=4)return "0123456789".slice(0,n);
+    var cs=sample(c,350),pool;
+    if(c.length<=2)pool=c;
+    else if(all.length<=1000)pool=all;
+    else pool=sample(c,350).concat(sample(all,150));
+    var isC=new Set(c),nb=(n+1)*(n+1),best=pool[0],bw=1e9,bs=1e9,bc=1;
+    for(var p=0;p<pool.length;p++){
+      var g=pool[p],cnt=new Array(nb).fill(0),i;
+      for(i=0;i<cs.length;i++)cnt[score(cs[i],g)]++;
+      var w=0,ss=0;
+      for(i=0;i<nb;i++){if(cnt[i]>w)w=cnt[i];ss+=cnt[i]*cnt[i]}
+      var cc=isC.has(g)?0:1;
+      if(w<bw||(w===bw&&(ss<bs||(ss===bs&&cc<bc)))){bw=w;bs=ss;bc=cc;best=g}
+    }
+    return best;
+  }
+  // Skill depends on level: low levels sometimes guess wildly or just any fitting number.
+  function botGuess(){
+    var c=S.cands,L=S.lvl;
+    if(c.length===1)return c[0];
+    if(Math.random()<WILD[L])return rnd(allCodes());
+    if(Math.random()<POPT[L])return pickBest();
+    return rnd(c);
+  }
+
+  function say(t,col){var m=$("msg");m.textContent=t;m.style.color=col||""}
+  function bcHtml(k,n){var n1=n+1;return '<span class="bc"><span class="b">'+Math.floor(k/n1)+'B</span> <span class="c">'+(k%n1)+'C</span></span>'}
+  function list(title,arr,cls,n){
+    var h='<div class="hd '+cls+'">'+title+' ('+arr.length+')</div>';
+    if(!arr.length)h+='<div class="none">Nothing yet</div>';
+    arr.forEach(function(t){h+='<div class="row"><span class="g">'+t.g+'</span>'+bcHtml(t.k,n)+'</div>'});
+    return h;
+  }
+  function opts(el,items,isSel,pick){
+    el.innerHTML="";
+    items.forEach(function(it){
+      var b=document.createElement("button");b.className="opt"+(isSel(it)?" sel":"");b.textContent=it.label;
+      b.onclick=function(){pick(it)};el.appendChild(b);
+    });
+  }
+
+  function render(){
+    var h=S.phase;
+    $("home").classList.toggle("hide",h!=="home");
+    $("hist").classList.toggle("hide",h!=="hist");
+    $("game").classList.toggle("hide",h==="home"||h==="hist");
+    if(h==="home")renderHome();else if(h==="hist")renderHist();else renderGame();
+  }
+  function renderHome(){
+    var l=levelOf(S.pts),cur=LEVELS[l],nx=LEVELS[l+1];
+    var pct=nx?Math.round((S.pts-cur.at)/(nx.at-cur.at)*100):100;
+    $("pts").innerHTML='<div id="lvl"><span class="mute">Level '+(l+1)+'</span><span class="mute">'+S.pts+' pts</span></div><b style="font-size:22px">'+cur.n+'</b><div class="bar"><i style="width:'+pct+'%"></i></div><div class="mute">'+(nx?(nx.at-S.pts)+' pts to '+nx.n+'. BOT plays harder as you level up.':'Max level. BOT plays at full strength.')+'</div>';
+    opts($("mode"),[{label:"Duel with BOT",v:"duel"},{label:"Solo (just guess)",v:"solo"}],function(i){return i.v===S.mode},function(i){S.mode=i.v;render()});
+    $("fmtwrap").classList.toggle("hide",S.mode==="solo");
+    $("note").textContent=S.mode==="solo"?"No number of your own needed. Crack BOT’s hidden number in as few guesses as you can. Fewer guesses earn more points.":"Write your secret number in your notebook. You guess BOT’s number here and tell BOT only the bulls and cows for its guesses.";
+    opts($("dig"),[3,4,5].map(function(d){return{label:d+"",v:d}}),function(i){return i.v===S.n},function(i){S.n=i.v;render()});
+    opts($("fmt"),FORMATS.map(function(x){return{label:x.n,v:x.need}}),function(i){return i.v===S.need},function(i){S.need=i.v;render()});
+  }
+  function renderHist(){
+    var el=$("hlist");el.innerHTML="";
+    $("clear").classList.toggle("hide",!S.hist.length);
+    if(!S.hist.length){el.innerHTML='<div class="card mute">No games yet. Finished rounds show up here.</div>';return}
+    S.hist.slice().reverse().forEach(function(g,ri){
+      var i=S.hist.length-1-ri,open=S.open===i;
+      var b=document.createElement("button");b.className="gh";
+      if(open)b.style.borderRadius="14px 14px 0 0";
+      var d=new Date(g.t).toLocaleDateString(undefined,{month:"short",day:"numeric"});
+      b.innerHTML='<span><b>Game '+(i+1)+'</b> · '+g.n+' digits'+(g.mode==="solo"?' · Solo':'')+'<small>'+d+' · BOT: '+LEVELS[g.lvl].n+' · BOT’s number '+g.bot+'</small></span><b class="'+(g.res==="u"?"u":"a")+'">'+(g.res==="u"?"You won":"BOT won")+'</b>';
+      b.onclick=function(){S.open=open?-1:i;renderHist()};
+      el.appendChild(b);
+      if(open){var dd=document.createElement("div");dd.className="gd";dd.innerHTML='<div>'+list("Your guesses",g.u,"u",g.n)+'</div><div>'+list("BOT’s guesses",g.a,"a",g.n)+'</div>';el.appendChild(dd)}
+    });
+  }
+  function renderGame(){
+    var h=S.phase,f=S.need===1?"Single round":"First to "+S.need;
+    $("score").innerHTML='<span class="u">You <b>'+S.score.u+'</b></span><span class="mute">Round '+S.round+' · '+S.n+' digits · '+LEVELS[S.lvl].n+'</span><span class="a"><b>'+S.score.a+'</b> BOT</span>';
+    $("lu").innerHTML=list("Your guesses",S.uT,"u",S.n);
+    $("la").innerHTML=list("BOT’s guesses",S.aT,"a",S.n);
+    var solo=S.mode==="solo";
+    $("la").classList.toggle("hide",solo);$("logs").style.gridTemplateColumns=solo?"1fr":"1fr 1fr";
+    if(solo)$("score").innerHTML='<span class="u">Solo</span><span class="mute">'+S.n+' digits · '+S.uT.length+' guess'+(S.uT.length===1?"":"es")+'</span><span class="mute">'+S.score.u+' cracked</span>';
+    $("lu").scrollTop=$("lu").scrollHeight;$("la").scrollTop=$("la").scrollHeight;
+    $("report").classList.toggle("hide",h!=="report");
+    $("play").classList.toggle("hide",h!=="guess");
+    $("next").classList.toggle("hide",h!=="between");
+    $("home2").classList.toggle("hide",h!=="between"&&h!=="over");
+    $("quit").classList.toggle("hide",h==="between"||h==="over");
+    if(h==="report"){
+      $("bg").textContent=S.pending;
+      var nums=function(){var r=[];for(var i=0;i<=S.n;i++)r.push({label:i+"",v:i});return r};
+      opts($("rb"),nums(),function(i){return i.v===S.rb},function(i){S.rb=i.v;render()});
+      opts($("rc"),nums(),function(i){return i.v===S.rc},function(i){S.rc=i.v;render()});
+      $("send").disabled=S.rb<0||S.rc<0;
+    }
+    if(h==="guess"){
+      var sl=$("slots");sl.innerHTML="";
+      for(var i=0;i<S.n;i++){var d=document.createElement("div");d.className="slot"+(i===S.cur.length?" on":"");d.textContent=S.cur[i]||"";sl.appendChild(d)}
+      $("go").disabled=!valid(S.cur);
+    }
+  }
+
+  function startMatch(){S.score={u:0,a:0};S.round=1;S.starter="u";startRound()}
+  function startRound(){
+    var all=allCodes();
+    S.gid++;S.lvl=levelOf(S.pts);
+    S.aSecret=rnd(all);S.cands=all;S.uT=[];S.aT=[];S.cur="";S.rb=-1;S.rc=-1;S.next=S.mode==="solo"?"u":S.starter;S.busy=false;
+    say("");goNext();
+  }
+  function goNext(){
+    if(S.next==="a"){
+      var id=S.gid;S.busy=true;S.phase="think";say("BOT is thinking…","var(--ai)");render();
+      setTimeout(function(){
+        if(id!==S.gid)return;
+        S.pending=botGuess();S.rb=-1;S.rc=-1;S.phase="report";S.busy=false;
+        say("Tell BOT how many bulls and cows it got.","");render();
+      },350);
+    }else{S.phase="guess";S.cur="";render()}
+  }
+  function submitGuess(){
+    if(S.phase!=="guess"||!valid(S.cur))return;
+    var g=S.cur,k=score(S.aSecret,g);S.cur="";
+    S.uT.push({g:g,k:k});
+    if(Math.floor(k/(S.n+1))===S.n){endRound("u");return}
+    S.next=S.mode==="solo"?"u":"a";say("");goNext();
+  }
+  function sendReport(){
+    var n=S.n,b=S.rb,c=S.rc;
+    if(S.phase!=="report"||b<0||c<0)return;
+    if(b+c>n||(b===n-1&&c===1)){say("That combination isn’t possible. Check your counts.","var(--cow)");return}
+    var g=S.pending,k=b*(n+1)+c;
+    var nc=S.cands.filter(function(x){return score(x,g)===k});
+    if(!nc.length){say("Those counts don’t fit your earlier answers. Please re-check BOT’s guesses.","var(--cow)");return}
+    S.cands=nc;S.aT.push({g:g,k:k});
+    if(b===n){endRound("a");return}
+    S.next="u";say("");goNext();
+  }
+  function endRound(w){
+    S.score[w]++;
+    S.hist.push({t:Date.now(),mode:S.mode,n:S.n,res:w,bot:S.aSecret,lvl:S.lvl,u:S.uT.slice(),a:S.aT.slice()});
+    if(S.hist.length>40)S.hist.shift();
+    save("bot-hist",S.hist);
+    var win=S.mode!=="solo"&&S.score[w]>=S.need,col=w==="u"?"var(--acc)":"var(--ai)",t,gain=0,before=levelOf(S.pts);
+    if(w==="u"){if(S.mode==="solo")gain=Math.max(5,15*(S.n-2)+10-2*(S.uT.length-1));else{gain=10*(S.n-2);if(win&&S.need>1)gain+=20}}
+    S.pts+=gain;save("bot-pts",S.pts);
+    var after=levelOf(S.pts);
+    if(win){
+      S.phase="over";
+      t=w==="u"?(S.need===1?"🎉 You cracked BOT’s number first!":"🏆 You win the match "+S.score.u+"–"+S.score.a+"!"):(S.need===1?"🤖 BOT cracked your number first.":"🤖 BOT wins the match "+S.score.a+"–"+S.score.u+".");
+    }else{
+      S.phase="between";
+      t=w==="u"?"🎯 Point to you! BOT’s number was "+S.aSecret+".":"🤖 Point to BOT. (BOT’s number was "+S.aSecret+".)";
+    }
+    if(S.mode==="solo")t="🎉 Cracked it in "+S.uT.length+" guess"+(S.uT.length===1?"":"es")+"! BOT’s number was "+S.aSecret+".";
+    if(gain)t+=" +"+gain+" pts.";
+    if(after>before)t+=" ⬆️ Level up: "+LEVELS[after].n+". BOT now plays harder!";
+    say(t,col);render();
+  }
+  function goHome(){S.gid++;S.phase="home";S.busy=false;say("");render()}
+  function nextRound(){S.round++;S.starter=S.starter==="u"?"a":"u";startRound()}
+
+  function press(d){if(S.phase!=="guess"||S.cur.length>=S.n)return;S.cur+=d;render()}
+  function back(){if(S.phase!=="guess")return;S.cur=S.cur.slice(0,-1);render()}
+
+  var pad=$("pad");
+  for(var d=1;d<=9;d++){(function(d){var b=document.createElement("button");b.textContent=d;b.onclick=function(){press(String(d))};pad.appendChild(b)})(d)}
+  var bk=document.createElement("button");bk.textContent="⌫";bk.onclick=back;pad.appendChild(bk);
+  var z=document.createElement("button");z.textContent="0";z.onclick=function(){press("0")};pad.appendChild(z);
+  var go=document.createElement("button");go.id="go";go.textContent="Guess";go.onclick=submitGuess;pad.appendChild(go);
+
+  $("start").onclick=startMatch;$("send").onclick=sendReport;$("next").onclick=nextRound;
+  $("home2").onclick=goHome;$("quit").onclick=goHome;$("back1").onclick=goHome;
+  $("openhist").onclick=function(){S.phase="hist";S.open=-1;render()};
+  $("clear").onclick=function(){S.hist=[];save("bot-hist",[]);render()};
+  document.addEventListener("keydown",function(e){
+    if(/^[0-9]$/.test(e.key))press(e.key);else if(e.key==="Backspace")back();else if(e.key==="Enter")submitGuess();
+  });
+  function updateAcct(){
+    $("acctText").textContent=S.user?"Signed in as "+(S.user.displayName||S.user.email||"guest"):"Sign in to save your progress online.";
+    $("acctBtn").textContent=S.user?"Sign out":"Sign in";
+  }
+  $("acctBtn").onclick=function(){
+    if(!window.botCloud){alert("Firebase isn’t set up yet. Paste your firebaseConfig into the file first.");return}
+    if(S.user)window.botCloud.signOut();else window.botCloud.signIn();
+  };
+  window.botAuth=function(u){S.user=u;updateAcct()};
+  window.botLoaded=function(d){
+    if(typeof d.pts==="number"&&d.pts>S.pts)S.pts=d.pts;
+    var seen={};S.hist.forEach(function(g){seen[g.t]=1});
+    (d.hist||[]).forEach(function(g){if(!seen[g.t])S.hist.push(g)});
+    S.hist.sort(function(a,b){return a.t-b.t});
+    if(S.hist.length>40)S.hist=S.hist.slice(-40);
+    try{localStorage.setItem("bot-pts",JSON.stringify(S.pts));localStorage.setItem("bot-hist",JSON.stringify(S.hist))}catch(e){}
+    if(window.botCloud)window.botCloud.save(S.pts,S.hist);
+    render();
+  };
+  render();
+})();
+</script>
+<script type="module">
+// ===== FIREBASE: paste your own config values below (Firebase console > Project settings > Your apps) =====
+const firebaseConfig={
+  apiKey:"PASTE_API_KEY",
+  authDomain:"PASTE_PROJECT_ID.firebaseapp.com",
+  projectId:"PASTE_PROJECT_ID",
+  appId:"PASTE_APP_ID"
+};
+// =========================================================================================================
+if(firebaseConfig.apiKey.startsWith("PASTE")){
+  console.warn("Firebase not configured yet. The game works offline and saves on this device only.");
+}else{
+  const V="10.14.1",B="https://www.gstatic.com/firebasejs/"+V+"/";
+  const {initializeApp}=await import(B+"firebase-app.js");
+  const {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged}=await import(B+"firebase-auth.js");
+  const {getFirestore,doc,getDoc,setDoc}=await import(B+"firebase-firestore.js");
+  const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
+  let user=null;
+  window.botCloud={
+    signIn:()=>signInWithPopup(auth,new GoogleAuthProvider()).catch(e=>alert("Sign-in failed: "+e.code)),
+    signOut:()=>signOut(auth),
+    save:(pts,hist)=>{if(user)setDoc(doc(db,"botUsers",user.uid),{pts:pts,hist:hist,updated:Date.now()},{merge:true}).catch(e=>console.warn(e))}
+  };
+  onAuthStateChanged(auth,async u=>{
+    user=u;
+    window.botAuth&&window.botAuth(u);
+    if(!u)return;
+    try{const s=await getDoc(doc(db,"botUsers",u.uid));window.botLoaded&&window.botLoaded(s.exists()?s.data():{})}catch(e){console.warn(e)}
+  });
+}
+</script>
+</body>
+</html>
